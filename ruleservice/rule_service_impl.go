@@ -2,19 +2,20 @@ package ruleservice
 
 import (
 	"encoding/json"
+	"log"
 	"os"
 	"sync"
 )
 
 type ruleServiceImpl struct {
 	mu        sync.Mutex
-	rules     map[string]Rule
+	rulesMap  map[string]Rule
 	rulesFile string
 }
 
-func NewRuleService(rulesFileName string) (*ruleServiceImpl, error) {
+func NewRuleService(rulesFileName string) (RuleService, error) {
 	service := &ruleServiceImpl{
-		rules:     make(map[string]Rule),
+		rulesMap:  make(map[string]Rule),
 		rulesFile: rulesFileName,
 	}
 	if err := service.loadRules(); err != nil {
@@ -23,7 +24,7 @@ func NewRuleService(rulesFileName string) (*ruleServiceImpl, error) {
 	return service, nil
 }
 
-// loadRules reads the JSON file and populates the rules map.
+// load rules.json to rulesMap
 func (r *ruleServiceImpl) loadRules() error {
 	data, err := os.ReadFile(r.rulesFile)
 	if err != nil {
@@ -35,18 +36,16 @@ func (r *ruleServiceImpl) loadRules() error {
 		return err
 	}
 
-	// Convert slice to map for easier lookup
 	for _, rule := range rules {
-		r.rules[rule.ID()] = rule
+		r.rulesMap[rule.ID()] = rule
 	}
-
 	return nil
 }
 
+// save rulesMap to rules.json
 func (r *ruleServiceImpl) saveRules() error {
-	// Convert the map back to a slice for JSON marshaling
 	var rules []Rule
-	for _, rule := range r.rules {
+	for _, rule := range r.rulesMap {
 		rules = append(rules, rule)
 	}
 
@@ -58,9 +57,9 @@ func (r *ruleServiceImpl) saveRules() error {
 	return os.WriteFile(r.rulesFile, data, 0644)
 }
 
-func (r *ruleServiceImpl) GetRules() []Rule {
+func (r *ruleServiceImpl) RetrieveRules() []Rule {
 	var ruleList []Rule
-	for _, v := range r.rules {
+	for _, v := range r.rulesMap {
 		ruleList = append(ruleList, v)
 	}
 	return ruleList
@@ -69,17 +68,27 @@ func (r *ruleServiceImpl) GetRules() []Rule {
 func (r *ruleServiceImpl) AddOrUpdate(rule Rule) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	r.rules[rule.ID()] = rule
+	r.rulesMap[rule.ID()] = rule
 	return r.saveRules()
 }
 
 func (r *ruleServiceImpl) Delete(rule Rule) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	delete(r.rules, rule.ID())
+	delete(r.rulesMap, rule.ID())
 	return r.saveRules()
 }
 
 func (r *ruleServiceImpl) FindRule(uriPrefix, fromIP string) Rule {
-	return r.rules[uriPrefix+fromIP]
+	rule := r.rulesMap[uriPrefix+fromIP]
+	if rule.URIprefix == uriPrefix && rule.FromIP == fromIP {
+		log.Printf("find rule by uriPrefix: %s, fromIP: %s", uriPrefix, fromIP)
+		return rule
+	}
+	rule = r.rulesMap[uriPrefix]
+	if rule.URIprefix == uriPrefix {
+		log.Printf("find rule by uriPrefix: %s", uriPrefix)
+		return rule
+	}
+	return Rule{}
 }
