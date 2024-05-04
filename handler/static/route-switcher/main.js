@@ -108,7 +108,7 @@ const recordFormData = {
 
 function initWebConsole() {
     const protocol = location.protocol == "https:" ? "wss:" : "ws:";
-    const socket = new WebSocket(protocol + "//" + location.host);
+    const socket = new WebSocket(protocol + "//" + location.host + "/log-msg");
     socket.onmessage = event => {
         const message = document.createElement("div");
         message.textContent = event.data;

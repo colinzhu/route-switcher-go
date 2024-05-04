@@ -15,5 +15,14 @@
     "updateBy": "test",
     "updateTime": 1714807818622,
     "remark": ""
+  },
+  {
+    "uriPrefix": "/get",
+    "fromIP": "127.0.0.1",
+    "targetOptions": "https://httpbin.org,http://httpbin.org",
+    "target": "https://httpbin.org",
+    "updateBy": "test",
+    "updateTime": 1714839573363,
+    "remark": ""
   }
 ]
