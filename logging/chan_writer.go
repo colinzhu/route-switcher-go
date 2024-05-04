@@ -1,4 +1,4 @@
-package handler
+package logging
 
 // ChanWriter is a custom io.Writer implementation that writes data to a channel
 type ChanWriter struct {

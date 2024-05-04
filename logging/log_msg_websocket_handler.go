@@ -1,4 +1,4 @@
-package handler
+package logging
 
 import (
 	"golang.org/x/net/websocket"
