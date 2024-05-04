@@ -1,2 +1,4 @@
 __*
 .idea/
+*.log
+route-switcher-go

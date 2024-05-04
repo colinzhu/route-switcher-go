@@ -2,6 +2,7 @@ package ruleservice
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"os"
 	"sync"
@@ -18,6 +19,15 @@ func NewRuleService(rulesFileName string) (RuleService, error) {
 		rulesMap:  make(map[string]Rule),
 		rulesFile: rulesFileName,
 	}
+
+	// check if rules.json exists, if not, then create one
+	if _, err := os.Stat(rulesFileName); errors.Is(err, os.ErrNotExist) {
+		if err := os.WriteFile(rulesFileName, []byte("[]"), 0644); err != nil {
+			return nil, err
+		}
+		log.Printf("%s not found, created one", rulesFileName)
+	}
+
 	if err := service.loadRules(); err != nil {
 		return nil, err
 	}
