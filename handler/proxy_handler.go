@@ -23,10 +23,10 @@ func NewProxyHandler(rs ruleservice.RuleService, dh http.Handler) http.Handler {
 }
 
 func (it *dynamicProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log.Printf("inURL: %s, inUrlPath: %s, remoteAddr: %s", r.URL, r.URL.Path, r.RemoteAddr)
+	//log.Printf("inURL: %s, inUrlPath: %s, remoteAddr: %s", r.URL, r.URL.Path, r.RemoteAddr)
 	rule := it.ruleService.FindRule(r.URL.Path, r.RemoteAddr)
 	if rule.Target == "" {
-		log.Printf("no rule found for %s, %s", r.URL.Path, r.RemoteAddr)
+		//log.Printf("no rule found for %s, %s", r.URL.Path, r.RemoteAddr)
 		if strings.HasPrefix(r.URL.Path, "/route-switcher/") {
 			it.embeddedStaticHandler.ServeHTTP(w, r)
 		} else {

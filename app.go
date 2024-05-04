@@ -31,7 +31,6 @@ func initLogging() *os.File {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//defer file.Close()
 	log.SetOutput(file)
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 	log.Printf("log initialized")
