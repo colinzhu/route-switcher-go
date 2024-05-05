@@ -4,16 +4,20 @@ import (
 	"golang.org/x/net/websocket"
 	"log"
 	"net/http"
+	"sync"
 )
 
 type LogMsgWebSocketHandler struct {
+	sync.Mutex
 	logMsgChannel chan string
 	wsConnList    map[*websocket.Conn]bool
 }
 
 func (it *LogMsgWebSocketHandler) wsHandler(wsConn *websocket.Conn) {
 	log.Printf("A new websocket client connected, %s, %s", wsConn.LocalAddr(), wsConn.RemoteAddr())
+	it.Lock()
 	it.wsConnList[wsConn] = true
+	it.Unlock()
 	buf := make([]byte, 1024)
 	for {
 		_, err := wsConn.Read(buf)
@@ -23,8 +27,8 @@ func (it *LogMsgWebSocketHandler) wsHandler(wsConn *websocket.Conn) {
 		}
 	}
 
-	defer delete(it.wsConnList, wsConn)
 	defer wsConn.Close()
+	defer delete(it.wsConnList, wsConn)
 }
 
 func (it *LogMsgWebSocketHandler) broadcastLogMsg() {
