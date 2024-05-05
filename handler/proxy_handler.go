@@ -33,7 +33,7 @@ func (it *dynamicProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 			it.rootStaticHandler.ServeHTTP(w, r)
 		}
 	} else {
-		log.Printf("rule found: %s", rule)
+		log.Printf("request: %s, target: %s", r.URL.Path, rule.Target)
 		it.proxyHandler.ServeHTTP(w, r)
 	}
 }

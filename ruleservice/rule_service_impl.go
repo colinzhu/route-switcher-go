@@ -92,12 +92,12 @@ func (r *ruleServiceImpl) Delete(rule Rule) error {
 func (r *ruleServiceImpl) FindRule(uriPrefix, fromIP string) Rule {
 	rule := r.rulesMap[uriPrefix+fromIP]
 	if rule.URIprefix == uriPrefix && rule.FromIP == fromIP {
-		log.Printf("find rule by uriPrefix: %s, fromIP: %s", uriPrefix, fromIP)
+		//log.Printf("find rule by uriPrefix: %s, fromIP: %s", uriPrefix, fromIP)
 		return rule
 	}
 	rule = r.rulesMap[uriPrefix]
 	if rule.URIprefix == uriPrefix {
-		log.Printf("find rule by uriPrefix: %s", uriPrefix)
+		//log.Printf("find rule by uriPrefix: %s", uriPrefix)
 		return rule
 	}
 	return Rule{}

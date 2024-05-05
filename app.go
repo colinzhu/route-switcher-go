@@ -28,12 +28,10 @@ func main() {
 }
 
 func startServer() {
-	var port int
-	flag.IntVar(&port, "p", 0, "Port number to use")
-	flag.IntVar(&port, "port", 0, "Port number to use (alias for -p)")
+	port := flag.Int("p", 0, "Port number to use, default is 0 for random")
 	flag.Parse()
 
-	listener, err := net.Listen("tcp", ":"+fmt.Sprint(port))
+	listener, err := net.Listen("tcp", fmt.Sprint(":", *port))
 	if err != nil {
 		panic(err)
 	}
