@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func InitLogging() (*os.File, chan string) {
+func InitLogging() (*os.File, *chan string) {
 	chanWriter := NewChanWriter()
 
 	file, err := os.OpenFile("route-switcher.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
@@ -18,5 +18,5 @@ func InitLogging() (*os.File, chan string) {
 	log.SetOutput(multiWriter)
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 	log.Printf("log initialized")
-	return file, chanWriter.Channel
+	return file, &chanWriter.Channel
 }

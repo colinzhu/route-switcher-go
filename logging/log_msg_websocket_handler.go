@@ -9,7 +9,7 @@ import (
 
 type LogMsgWebSocketHandler struct {
 	sync.Mutex
-	logMsgChannel chan string
+	logMsgChannel *chan string
 	wsConnList    map[*websocket.Conn]bool
 }
 
@@ -33,14 +33,14 @@ func (it *LogMsgWebSocketHandler) wsHandler(wsConn *websocket.Conn) {
 
 func (it *LogMsgWebSocketHandler) broadcastLogMsg() {
 	for {
-		logMsg := <-it.logMsgChannel
+		logMsg := <-*it.logMsgChannel
 		for conn := range it.wsConnList {
 			conn.Write([]byte(logMsg))
 		}
 	}
 }
 
-func NewLogMsgWebSocketHandler(channel chan string) http.Handler {
+func NewLogMsgWebSocketHandler(channel *chan string) http.Handler {
 	h := &LogMsgWebSocketHandler{logMsgChannel: channel, wsConnList: make(map[*websocket.Conn]bool)}
 	go h.broadcastLogMsg()
 	return h
