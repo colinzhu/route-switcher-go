@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -89,16 +90,28 @@ func (r *ruleServiceImpl) Delete(rule Rule) error {
 	return r.saveRules()
 }
 
-func (r *ruleServiceImpl) FindRule(uriPrefix, fromIP string) Rule {
-	rule := r.rulesMap[uriPrefix+fromIP]
-	if rule.URIprefix == uriPrefix && rule.FromIP == fromIP {
-		//log.Printf("find rule by uriPrefix: %s, fromIP: %s", uriPrefix, fromIP)
-		return rule
+func (r *ruleServiceImpl) FindRule(inUrlPath, fromIP string) Rule {
+	var matchedRule *Rule
+	for _, oneRule := range r.rulesMap { // match by URIprefix and FromIP
+		if strings.HasPrefix(inUrlPath, oneRule.URIprefix) && strings.Contains(oneRule.FromIP, fromIP) {
+			//log.Printf("Found one rule by inUrlPath: %s, fromIP: %s", inUrlPath, fromIP)
+			matchedRule = &oneRule
+			break
+		}
 	}
-	rule = r.rulesMap[uriPrefix]
-	if rule.URIprefix == uriPrefix {
-		//log.Printf("find rule by uriPrefix: %s", uriPrefix)
-		return rule
+	if matchedRule == nil {
+		for _, oneRule := range r.rulesMap { // match by URIpfix only
+			if strings.HasPrefix(inUrlPath, oneRule.URIprefix) {
+				//log.Printf("Found one rule by inUrlPath: %s", inUrlPath)
+				matchedRule = &oneRule
+				break
+			}
+		}
 	}
-	return Rule{}
+	if matchedRule == nil {
+		//log.Printf("No rules found by inUrlPath: %s, fromIP: %s", inUrlPath, fromIP)
+		return Rule{}
+	} else {
+		return *matchedRule
+	}
 }

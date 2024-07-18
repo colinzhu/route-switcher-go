@@ -6,7 +6,9 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"route-switcher-go/ruleservice"
-	"strings"
+
+	"github.com/google/uuid"
+	"golang.org/x/net/context"
 )
 
 type dynamicProxyHandler struct {
@@ -22,24 +24,28 @@ func NewProxyHandler(rs ruleservice.RuleService, dh http.Handler) http.Handler {
 	return &switcher
 }
 
-func (it *dynamicProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (it *dynamicProxyHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	//log.Printf("inURL: %s, inUrlPath: %s, remoteAddr: %s", r.URL, r.URL.Path, r.RemoteAddr)
 	rule := it.ruleService.FindRule(r.URL.Path, r.RemoteAddr)
 	if rule.Target == "" {
-		//log.Printf("no rule found for %s, %s", r.URL.Path, r.RemoteAddr)
-		if strings.HasPrefix(r.URL.Path, "/route-switcher/") {
-			it.embeddedStaticHandler.ServeHTTP(w, r)
+		//log.Printf("No rule found for %s, %s", r.URL.Path, r.RemoteAddr)
+		if r.URL.Path == "/route-switcher.log" || r.URL.Path == "/rules.json" {
+			it.rootStaticHandler.ServeHTTP(rw, r)
 		} else {
-			it.rootStaticHandler.ServeHTTP(w, r)
+			it.embeddedStaticHandler.ServeHTTP(rw, r)
 		}
 	} else {
-		log.Printf("request: %s, target: %s", r.URL.Path, rule.Target)
-		it.proxyHandler.ServeHTTP(w, r)
+		uid, _ := uuid.NewV7()
+		corrIdStr := uid.String()[len(uid.String())-12:]
+
+		log.Printf("request:  [%s][%s][%s][%s] ===> %s%s", corrIdStr, r.URL.Path, r.RemoteAddr, r.Method, rule.Target, r.URL.Path)
+		request := r.WithContext(context.WithValue(r.Context(), "correlationId", corrIdStr))
+		it.proxyHandler.ServeHTTP(rw, request) // let the ReverseProxy to handle the request
 	}
 }
 
 func (it *dynamicProxyHandler) initProxy() {
-	it.proxyHandler = &httputil.ReverseProxy{Rewrite: it.rewrite}
+	it.proxyHandler = &httputil.ReverseProxy{Rewrite: it.rewrite, ModifyResponse: it.modifyResponse}
 	it.rootStaticHandler = http.FileServer(http.Dir("./"))
 }
 
@@ -47,4 +53,9 @@ func (it *dynamicProxyHandler) rewrite(r *httputil.ProxyRequest) {
 	rule := it.ruleService.FindRule(r.In.URL.Path, r.In.RemoteAddr)
 	target, _ := url.Parse(rule.Target)
 	r.SetURL(target)
+}
+
+func (it *dynamicProxyHandler) modifyResponse(resp *http.Response) error {
+	log.Printf("response: [%s][%s]", resp.Request.Context().Value("correlationId"), resp.Status)
+	return nil
 }

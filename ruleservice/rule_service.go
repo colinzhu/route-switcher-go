@@ -5,5 +5,5 @@ type RuleService interface {
 	RetrieveRules() []Rule
 	AddOrUpdate(rule Rule) error
 	Delete(rule Rule) error
-	FindRule(uriPrefix, fromIP string) Rule
+	FindRule(inUrlPath, fromIP string) Rule
 }

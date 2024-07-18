@@ -11,10 +11,10 @@
     "uriPrefix": "/get",
     "fromIP": "",
     "targetOptions": "https://httpbin.org,http://httpbin.org",
-    "target": "http://httpbin.org",
-    "updateBy": "test",
-    "updateTime": 1714807818622,
-    "remark": ""
+    "target": "https://httpbin.org",
+    "updateBy": "colin",
+    "updateTime": 1714925762873,
+    "remark": "test2"
   },
   {
     "uriPrefix": "/get",
