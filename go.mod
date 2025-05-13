@@ -1,4 +1,4 @@
-module route-switcher-go
+module github.com/colinzhu/route-switcher-go
 
 go 1.22
 

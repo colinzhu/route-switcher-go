@@ -7,9 +7,10 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"route-switcher-go/handler"
-	"route-switcher-go/logging"
-	"route-switcher-go/ruleservice"
+
+	"github.com/colinzhu/route-switcher-go/handler"
+	"github.com/colinzhu/route-switcher-go/logging"
+	"github.com/colinzhu/route-switcher-go/ruleservice"
 )
 
 func main() {

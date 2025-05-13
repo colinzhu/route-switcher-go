@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"route-switcher-go/ruleservice"
+
+	"github.com/colinzhu/route-switcher-go/ruleservice"
 
 	"github.com/google/uuid"
 	"golang.org/x/net/context"
